@@ -7,7 +7,9 @@ import { PropertyFilters } from "@/components/property-filters"
 import { filterProperties } from "@/lib/property-utils"
 import type { Property } from "@/types"
 import { useRouter } from "next/navigation"
-import { Loader2 } from "lucide-react"
+import { Loader2, LogOut } from "lucide-react"
+import { clearManagerAuth } from "@/lib/manager-auth"
+import { Button } from "@/components/ui/button"
 
 export default function ManagerDashboard() {
   const router = useRouter()
@@ -19,6 +21,12 @@ export default function ManagerDashboard() {
 
   const handleViewReviews = (property: Property) => {
     router.push(`/manager/reviews/${property.id}`)
+  }
+
+  const handleLogout = () => {
+    clearManagerAuth()
+    router.push("/manager/login")
+    router.refresh()
   }
 
   if (propertiesLoading) {
@@ -40,7 +48,13 @@ export default function ManagerDashboard() {
     <div className="min-h-screen bg-gray-50">
       <div className="border-b bg-white">
         <div className="container mx-auto px-4 py-6">
-          <h1 className="text-3xl font-bold mb-2">Manager Dashboard</h1>
+          <div className="flex items-center justify-between mb-2">
+            <h1 className="text-3xl font-bold">Manager Dashboard</h1>
+            <Button variant="outline" onClick={handleLogout} size="sm">
+              <LogOut className="h-4 w-4 mr-2" />
+              Logout
+            </Button>
+          </div>
           <p className="text-muted-foreground">Manage properties and review performance</p>
         </div>
       </div>
