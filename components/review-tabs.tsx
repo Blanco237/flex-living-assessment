@@ -2,7 +2,7 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import type { Review } from "@/types"
-import type { ReviewStatus } from "@/lib/review-storage"
+import type { ReviewStatus } from "@/actions/review-approvals"
 import { ReviewCard } from "./review-card"
 
 interface ReviewTabsProps {

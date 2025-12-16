@@ -1,18 +1,13 @@
 "use client"
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import type { Review } from "@/types"
-import { getReviewStatus, setReviewStatus, type ReviewStatus } from "@/lib/review-storage"
+import { fetchReviews } from "@/actions/reviews"
+import { getReviewStatus, getAllReviewStatuses, setReviewStatus } from "@/actions/review-approvals"
 
 export function useReviews(propertyId: string) {
   return useQuery({
     queryKey: ["reviews", propertyId],
-    queryFn: async () => {
-      const response = await fetch(`/api/reviews/${propertyId}`)
-      if (!response.ok) throw new Error("Failed to fetch reviews")
-      const data = await response.json()
-      return data.reviews as Review[]
-    },
+    queryFn: () => fetchReviews(propertyId),
   })
 }
 
@@ -23,16 +18,33 @@ export function useReviewStatus(reviewId: string) {
   })
 }
 
+export function useAllReviewStatuses(propertyId?: string) {
+  return useQuery({
+    queryKey: ["review-statuses", propertyId],
+    queryFn: () => getAllReviewStatuses(propertyId),
+  })
+}
+
 export function useUpdateReviewStatus() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ reviewId, status }: { reviewId: string; status: ReviewStatus }) => {
-      setReviewStatus(reviewId, status)
-      return { reviewId, status }
+    mutationFn: async ({
+      reviewId,
+      propertyId,
+      status,
+    }: {
+      reviewId: string
+      propertyId: string
+      status: "approved" | "rejected"
+    }) => {
+      await setReviewStatus(reviewId, propertyId, status)
+      return { reviewId, propertyId, status }
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["review-status"] })
+      queryClient.invalidateQueries({ queryKey: ["review-statuses"] })
+      queryClient.invalidateQueries({ queryKey: ["review-statuses", data.propertyId] })
     },
   })
 }

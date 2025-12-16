@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import type { Review } from "@/types"
-import type { ReviewStatus } from "@/lib/review-storage"
+import type { ReviewStatus } from "@/actions/review-approvals"
 import { Star, Check, X } from "lucide-react"
 import { format } from "date-fns"
 

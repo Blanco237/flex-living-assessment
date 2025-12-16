@@ -6,12 +6,17 @@ import "./globals.css"
 
 import { QueryProvider } from "@/providers/query-provider"
 
-import { Geist_Mono, Geist as V0_Font_Geist, Geist_Mono as V0_Font_Geist_Mono, Source_Serif_4 as V0_Font_Source_Serif_4 } from 'next/font/google'
+["400", "500", "600", "700", "800", "900"] })
+
+import { Inter, Noto_Sans, Geist as V0_Font_Geist, Geist_Mono as V0_Font_Geist_Mono, Source_Serif_4 as V0_Font_Source_Serif_4 } from 'next/font/google'
+import { Inter, Noto_Sans, Geist as V0_Font_Geist, Geist_Mono as V0_Font_Geist_Mono, Source_Serif_4 as V0_Font_Source_Serif_4 } from 'next/font/google'
 
 // Initialize fonts
 const _geist = V0_Font_Geist({ subsets: ['latin'], weight: ["100","200","300","400","500","600","700","800","900"] })
 const _geistMono = V0_Font_Geist_Mono({ subsets: ['latin'], weight: ["100","200","300","400","500","600","700","800","900"] })
 const _sourceSerif_4 = V0_Font_Source_Serif_4({ subsets: ['latin'], weight: ["200","300","400","500","600","700","800","900"] })
+
+const _notoSans = Noto_Sans({ subsets: ["latin"], weight: ["300", "400", "500", "600", "700"] })
 
 export const metadata: Metadata = {
   title: "FlexLiving - Find Your Perfect Stay",
@@ -43,7 +48,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`font-sans antialiased`}>
+      <body className={`font-sans antialiased ${_notoSans.className}`}>
         <QueryProvider>{children}</QueryProvider>
         <Analytics />
       </body>

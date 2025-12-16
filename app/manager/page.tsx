@@ -8,7 +8,6 @@ import { filterProperties } from "@/lib/property-utils"
 import type { Property } from "@/types"
 import { useRouter } from "next/navigation"
 import { Loader2, LogOut } from "lucide-react"
-import { clearManagerAuth } from "@/lib/manager-auth"
 import { Button } from "@/components/ui/button"
 
 export default function ManagerDashboard() {
@@ -23,8 +22,8 @@ export default function ManagerDashboard() {
     router.push(`/manager/reviews/${property.id}`)
   }
 
-  const handleLogout = () => {
-    clearManagerAuth()
+  const handleLogout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" })
     router.push("/manager/login")
     router.refresh()
   }

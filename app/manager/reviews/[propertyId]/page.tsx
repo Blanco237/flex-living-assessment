@@ -2,33 +2,35 @@
 
 import { use, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { useReviews, useUpdateReviewStatus } from "@/hooks/use-reviews"
-import { getReviewStatus } from "@/lib/review-storage"
+import { useReviews, useUpdateReviewStatus, useAllReviewStatuses } from "@/hooks/use-reviews"
 import { ReviewTabs } from "@/components/review-tabs"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Loader2 } from "lucide-react"
+import type { ReviewStatus } from "@/actions/review-approvals"
 
 export default function ReviewManagementPage({ params }: { params: Promise<{ propertyId: string }> }) {
   const { propertyId } = use(params)
   const router = useRouter()
   const { data: reviews, isLoading } = useReviews(propertyId)
+  const { data: statuses } = useAllReviewStatuses(propertyId)
   const updateStatus = useUpdateReviewStatus()
 
-  const [reviewStatuses, setReviewStatuses] = useState<Map<string, "approved" | "rejected" | "pending">>(new Map())
+  const [reviewStatuses, setReviewStatuses] = useState<Map<string, ReviewStatus>>(new Map())
 
   useEffect(() => {
-    if (reviews) {
-      const statusMap = new Map()
+    if (reviews && statuses) {
+      const statusMap = new Map<string, ReviewStatus>()
       reviews.forEach((review) => {
-        statusMap.set(review.id, getReviewStatus(review.id))
+        const statusRecord = statuses.find((s) => s.reviewId === review.id)
+        statusMap.set(review.id, statusRecord?.status || "pending")
       })
       setReviewStatuses(statusMap)
     }
-  }, [reviews])
+  }, [reviews, statuses])
 
   const handleApprove = (reviewId: string) => {
     updateStatus.mutate(
-      { reviewId, status: "approved" },
+      { reviewId, propertyId, status: "approved" },
       {
         onSuccess: () => {
           setReviewStatuses((prev) => new Map(prev).set(reviewId, "approved"))
@@ -39,7 +41,7 @@ export default function ReviewManagementPage({ params }: { params: Promise<{ pro
 
   const handleReject = (reviewId: string) => {
     updateStatus.mutate(
-      { reviewId, status: "rejected" },
+      { reviewId, propertyId, status: "rejected" },
       {
         onSuccess: () => {
           setReviewStatuses((prev) => new Map(prev).set(reviewId, "rejected"))

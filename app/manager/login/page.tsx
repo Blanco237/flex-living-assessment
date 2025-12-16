@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { setManagerAuth } from "@/lib/manager-auth"
 import { Lock, Loader2 } from "lucide-react"
 
 export default function ManagerLoginPage() {
@@ -33,7 +32,6 @@ export default function ManagerLoginPage() {
       const data = await response.json()
 
       if (data.success) {
-        setManagerAuth()
         router.push("/manager")
         router.refresh()
       } else {
