@@ -1,56 +1,46 @@
-"use server"
+"use server";
 
-import { supabase } from "@/lib/supabase"
+import { supabase } from "@/lib/supabase";
 
-export type ReviewStatus = "approved" | "rejected" | "pending"
+export type ReviewStatus = "approved" | "rejected" | "pending";
 
-export async function getReviewStatus(reviewId: string): Promise<ReviewStatus> {
-  const { data, error } = await supabase.from("review_approvals").select("status").eq("review_id", reviewId).single()
-
-  if (error || !data) {
-    return "pending"
-  }
-
-  return data.status as ReviewStatus
+export interface ReviewStatusRecord {
+  reviewId: string;
+  status: Exclude<ReviewStatus, "pending">;
 }
 
-export async function getAllReviewStatuses(propertyId?: string) {
-  let query = supabase.from("review_approvals").select("*")
-
-  if (propertyId) {
-    query = query.eq("property_id", propertyId)
-  }
-
-  const { data, error } = await query
+export async function getReviewStatuses(): Promise<ReviewStatusRecord[]> {
+  const { data, error } = await supabase
+    .from("review_status")
+    .select("id, review_id, status");
 
   if (error || !data) {
-    return []
+    return [];
   }
 
   return data.map((item) => ({
     reviewId: item.review_id,
-    status: item.status as ReviewStatus,
-  }))
+    status: item.status as Exclude<ReviewStatus, "pending">,
+  }));
 }
 
 export async function setReviewStatus(
   reviewId: string,
-  propertyId: string,
-  status: "approved" | "rejected",
+  status: Exclude<ReviewStatus, "pending">
 ): Promise<void> {
-  const { error } = await supabase.from("review_approvals").upsert(
+  // The new `review_status` table tracks explicit statuses for reviews.
+  // Setting status upserts a record keyed by `review_id`.
+  const { error } = await supabase.from("review_status").upsert(
     {
       review_id: reviewId,
-      property_id: propertyId,
       status,
-      updated_at: new Date().toISOString(),
     },
     {
       onConflict: "review_id",
-    },
-  )
+    }
+  );
 
   if (error) {
-    throw new Error(`Failed to update review status: ${error.message}`)
+    throw new Error(`Failed to update review status: ${error.message}`);
   }
 }

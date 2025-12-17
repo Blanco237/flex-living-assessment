@@ -1,15 +1,13 @@
 import { createClient } from "@supabase/supabase-js"
+import APP_CONSTANTS from "./constants"
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseUrl = APP_CONSTANTS.SUPABASE.URL || ""
+const supabaseAnonKey = APP_CONSTANTS.SUPABASE.KEY || ""
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
+// Matches the new `approved_reviews` table schema
 export type ReviewApproval = {
-  id: string
-  review_id: string
-  property_id: string
-  status: "approved" | "rejected"
-  created_at: string
-  updated_at: string
+  id: number
+  review_id: number
 }

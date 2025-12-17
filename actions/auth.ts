@@ -1,29 +1,74 @@
-"use server"
+"use server";
+
+import APP_CONSTANTS from "@/lib/constants";
+import axios from "axios";
+import { cookies } from "next/headers";
 
 interface TokenData {
-  token: string
-  expiresAt: number
+  token_type: "Bearer";
+  expires_in: number;
+  access_token: string;
 }
 
-export async function generateAccessToken(): Promise<TokenData> {
-  const clientId = process.env.HOSTAWAY_CLIENT_ID || "demo_client"
-  const clientSecret = process.env.HOSTAWAY_CLIENT_SECRET || "demo_secret"
-
+export async function generateAccessToken(): Promise<string> {
   try {
-    // In production, this would call the real accessToken endpoint
-    // POST /accessToken with clientId and clientSecret
-    // For now, using the provided API key as fallback
-    const token = process.env.HOSTAWAY_API_KEY || "f94377ebbbb479490bb3ec364649168dc443dda2e4830facaf5de2e74ccc9152"
+    const formData = new URLSearchParams();
+    formData.append("grant_type", "client_credentials");
+    formData.append(
+      "client_id",
+      String(APP_CONSTANTS.HOSTAWAY.ACCOUNT_ID ?? "")
+    );
+    formData.append(
+      "client_secret",
+      String(APP_CONSTANTS.HOSTAWAY.API_KEY ?? "")
+    );
+    formData.append("scope", "general");
 
-    // Return token with 24hr expiry
-    const tokenData: TokenData = {
-      token,
-      expiresAt: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
-    }
+    const response = await axios.post<TokenData>(
+      `${APP_CONSTANTS.HOSTAWAY.BASE_URL}/accessTokens`,
+      formData.toString(),
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      }
+    );
 
-    return tokenData
+    const tokenData: TokenData = response.data;
+
+    return tokenData.access_token;
   } catch (error) {
-    console.error("Failed to generate access token:", error)
-    throw new Error("Authentication failed")
+    console.error("Failed to generate access token:", error);
+    throw new Error("Authentication failed");
   }
+}
+
+export interface VerifyManagerState {
+  error?: string | null;
+}
+
+export async function verifyManagerAccess(
+  secret: string
+): Promise<{ success: boolean }> {
+  const ACCESS_SECRET = APP_CONSTANTS.MANAGEMENT_ACCESS_SECRET;
+
+  if (secret === ACCESS_SECRET) {
+    const authData = {
+      authenticated: true,
+      timestamp: Date.now(),
+    };
+
+    const cookieStore = await cookies();
+    cookieStore.set("manager_auth", JSON.stringify(authData), {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: APP_CONSTANTS.AUTH_DURATION,
+      path: "/",
+    });
+
+    return { success: true };
+  }
+
+  return { success: false };
 }

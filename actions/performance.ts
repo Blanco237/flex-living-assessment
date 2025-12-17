@@ -1,58 +1,71 @@
-"use server"
+"use server";
 
-import { fetchProperties } from "./properties"
-import { fetchReservations } from "./reservations"
-import type { PropertyPerformance } from "@/types"
+import dayjs from "dayjs";
+
+import { fetchProperties } from "./properties";
+import { fetchReservations } from "./reservations";
+import type { PropertyPerformance } from "@/types";
+import { groupBy } from "@/lib/utils";
 
 export async function fetchPerformance(): Promise<PropertyPerformance[]> {
   try {
-    const [properties, reservations] = await Promise.all([fetchProperties(), fetchReservations()])
+    const now = dayjs();
+    const currentMonthStart = now.startOf("month");
+    const previousMonthStart = currentMonthStart.subtract(1, "month");
+    const currentMonthKey = currentMonthStart.format("YYYY-MM");
+    const previousMonthKey = previousMonthStart.format("YYYY-MM");
 
-    const now = new Date()
-    const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-    const nextMonthStart = new Date(now.getFullYear(), now.getMonth() + 1, 1)
-    const previousMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+    const [properties, reservations] = await Promise.all([
+      fetchProperties(),
+      fetchReservations({ arrivalStartDate: previousMonthStart.format() }),
+    ]);
 
-    // Calculate performance for each property
-    const performance = properties.map((property) => {
-      const propertyReservations = reservations.filter((r) => r.listingMapId === property.id)
+    const reservationsByListingId = groupBy(
+      reservations,
+      (reservation) => reservation.listingMapId
+    );
 
-      // Current/next month reservations
-      const currentPeriodReservations = propertyReservations.filter((r) => {
-        const arrivalDate = new Date(r.arrivalDate)
-        return arrivalDate >= currentMonthStart && arrivalDate < nextMonthStart
-      })
+    const performance: PropertyPerformance[] = properties.map((property) => {
+      const propertyReservations = reservationsByListingId[property.id] ?? [];
 
-      // Previous month reservations
-      const previousPeriodReservations = propertyReservations.filter((r) => {
-        const arrivalDate = new Date(r.arrivalDate)
-        return arrivalDate >= previousMonthStart && arrivalDate < currentMonthStart
-      })
+      const reservationsByMonth = groupBy(propertyReservations, (reservation) =>
+        dayjs(reservation.arrivalDate).format("YYYY-MM")
+      );
 
-      const currentBookings = currentPeriodReservations.length
-      const previousBookings = previousPeriodReservations.length
+      const currentPeriodReservations =
+        reservationsByMonth[currentMonthKey] ?? [];
+      const previousPeriodReservations =
+        reservationsByMonth[previousMonthKey] ?? [];
 
-      const currentRevenue = currentPeriodReservations.reduce((sum, r) => sum + (r.totalPrice || 0), 0)
-      const previousRevenue = previousPeriodReservations.reduce((sum, r) => sum + (r.totalPrice || 0), 0)
+      const currentRevenue = currentPeriodReservations.reduce(
+        (sum, reservation) => sum + (reservation.totalPrice || 0),
+        0
+      );
+      const previousRevenue = previousPeriodReservations.reduce(
+        (sum, reservation) => sum + (reservation.totalPrice || 0),
+        0
+      );
 
-      const bookingChange = previousBookings === 0 ? 0 : ((currentBookings - previousBookings) / previousBookings) * 100
-      const revenueChange = previousRevenue === 0 ? 0 : ((currentRevenue - previousRevenue) / previousRevenue) * 100
+      const percentageChange =
+        previousRevenue === 0
+          ? 100
+          : ((currentRevenue - previousRevenue) / previousRevenue) * 100;
+
+      const trend: PropertyPerformance["trend"] =
+        percentageChange > 0 ? "up" : percentageChange < 0 ? "down" : "stable";
 
       return {
         propertyId: property.id,
-        propertyName: property.name,
-        currentBookings,
-        previousBookings,
-        bookingChange,
-        currentRevenue,
-        previousRevenue,
-        revenueChange,
-      }
-    })
+        currentMonthRevenue: currentRevenue,
+        previousMonthRevenue: previousRevenue,
+        percentageChange: Math.round(Math.abs(percentageChange)),
+        trend,
+      };
+    });
 
-    return performance
+    return performance;
   } catch (error) {
-    console.error("Error calculating performance:", error)
-    throw new Error("Failed to calculate performance")
+    console.error("Error calculating performance:", error);
+    throw new Error("Failed to calculate performance");
   }
 }

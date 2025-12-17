@@ -1,29 +1,29 @@
-"use server"
+"use server";
 
-import { apiClient, HOSTAWAY_ACCOUNT_ID } from "@/lib/axios-client"
+import API, { PaginatedResponse } from "@/lib/axios-client";
 
 interface Reservation {
-  id: number
-  listingMapId: number
-  arrivalDate: string
-  departureDate: string
-  status: string
-  totalPrice: number
-  nights: number
+  id: number;
+  listingMapId: number;
+  arrivalDate: string;
+  departureDate: string;
+  status: string;
+  totalPrice: number;
+  nights: number;
 }
 
-export async function fetchReservations(): Promise<Reservation[]> {
+export async function fetchReservations(params: {
+  arrivalStartDate: string;
+}): Promise<Reservation[]> {
   try {
-    const response = await apiClient.get(`/reservations`, {
-      params: {
-        accountId: HOSTAWAY_ACCOUNT_ID,
-        limit: 500,
-      },
-    })
+    const response: PaginatedResponse<Reservation> = await API.get(
+      `/reservations`,
+      params
+    );
 
-    return response.data.result || []
+    return response.result || [];
   } catch (error) {
-    console.error("Error fetching reservations:", error)
-    throw new Error("Failed to fetch reservations")
+    console.error("Error fetching reservations:", error);
+    throw new Error("Failed to fetch reservations");
   }
 }

@@ -1,56 +1,74 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import type { Property, PropertyPerformance } from "@/types"
-import { getPropertyTypeLabel } from "@/lib/property-utils"
-import { Star, BedDouble, Users, MapPin, TrendingUp, TrendingDown, Minus } from "lucide-react"
-import Image from "next/image"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import type { Property, PropertyPerformance } from "@/types";
+import { getPropertyTypeLabel } from "@/lib/property-utils";
+import {
+  Star,
+  BedDouble,
+  Users,
+  MapPin,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+} from "lucide-react";
+import Image from "next/image";
+import { useRouter } from "nextjs-toploader/app";
 
 interface PropertyCardProps {
-  property: Property
-  performance?: PropertyPerformance
-  onViewReviews: (property: Property) => void
+  property: Property;
+  performance?: PropertyPerformance;
 }
 
-export function PropertyCard({ property, performance, onViewReviews }: PropertyCardProps) {
-  const imageUrl = property.listingImages?.[0]?.url || "/modern-city-apartment.png"
+export function PropertyCard({ property, performance }: PropertyCardProps) {
+  const router = useRouter();
+  const imageUrl =
+    property.listingImages?.[0]?.url || "/modern-city-apartment.png";
 
   const getTrendIcon = () => {
-    if (!performance) return null
+    if (!performance) return null;
     switch (performance.trend) {
       case "up":
-        return <TrendingUp className="h-4 w-4 text-green-600" />
+        return <TrendingUp className="h-4 w-4 text-green-600" />;
       case "down":
-        return <TrendingDown className="h-4 w-4 text-red-600" />
+        return <TrendingDown className="h-4 w-4 text-red-600" />;
       default:
-        return <Minus className="h-4 w-4 text-gray-500" />
+        return <Minus className="h-4 w-4 text-gray-500" />;
     }
-  }
+  };
 
   const getTrendColor = () => {
-    if (!performance) return "secondary"
+    if (!performance) return "secondary";
     switch (performance.trend) {
       case "up":
-        return "default"
+        return "default";
       case "down":
-        return "destructive"
+        return "destructive";
       default:
-        return "secondary"
+        return "secondary";
     }
-  }
+  };
 
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+    <Card className="overflow-hidden hover:shadow-lg transition-shadow pt-0">
       <div className="relative h-48 w-full overflow-hidden">
-        <Image src={imageUrl || "/placeholder.svg"} alt={property.name} fill className="object-cover" />
+        <Image
+          src={imageUrl || "/placeholder.svg"}
+          alt={property.name}
+          fill
+          className="object-cover"
+        />
         <div className="absolute top-3 right-3 flex gap-2">
           <Badge variant="secondary" className="bg-white/90 backdrop-blur-sm">
             {getPropertyTypeLabel(property.propertyTypeId)}
           </Badge>
           {property.averageReviewRating > 0 && (
-            <Badge variant="default" className="bg-white/90 backdrop-blur-sm text-gray-900 gap-1">
+            <Badge
+              variant="default"
+              className="bg-white/90 backdrop-blur-sm text-gray-900 gap-1"
+            >
               <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
               {property.averageReviewRating}
             </Badge>
@@ -98,11 +116,14 @@ export function PropertyCard({ property, performance, onViewReviews }: PropertyC
             <span className="text-2xl font-bold">£{property.price}</span>
             <span className="text-sm text-muted-foreground">/night</span>
           </div>
-          <Button onClick={() => onViewReviews(property)} variant="default">
+          <Button
+            onClick={() => router.push(`/manager/reviews/${property.id}`)}
+            variant="default"
+          >
             View Reviews
           </Button>
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

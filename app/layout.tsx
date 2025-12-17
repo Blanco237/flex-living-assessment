@@ -1,26 +1,29 @@
-import type { Metadata } from "next"
-import type React from "react"
+import type { Metadata } from "next";
+import type React from "react";
 
-import { Analytics } from "@vercel/analytics/next"
-import "./globals.css"
+import { Analytics } from "@vercel/analytics/next";
+import "./globals.css";
 
-import { QueryProvider } from "@/providers/query-provider"
+import { QueryProvider } from "@/providers/query-provider";
+import NextTopLoader from "nextjs-toploader";
 
-["400", "500", "600", "700", "800", "900"] })
-
-import { Inter, Noto_Sans, Geist as V0_Font_Geist, Geist_Mono as V0_Font_Geist_Mono, Source_Serif_4 as V0_Font_Source_Serif_4 } from 'next/font/google'
-import { Inter, Noto_Sans, Geist as V0_Font_Geist, Geist_Mono as V0_Font_Geist_Mono, Source_Serif_4 as V0_Font_Source_Serif_4 } from 'next/font/google'
+import { Inter, Noto_Sans } from "next/font/google";
+import { Toaster } from "sonner";
 
 // Initialize fonts
-const _geist = V0_Font_Geist({ subsets: ['latin'], weight: ["100","200","300","400","500","600","700","800","900"] })
-const _geistMono = V0_Font_Geist_Mono({ subsets: ['latin'], weight: ["100","200","300","400","500","600","700","800","900"] })
-const _sourceSerif_4 = V0_Font_Source_Serif_4({ subsets: ['latin'], weight: ["200","300","400","500","600","700","800","900"] })
-
-const _notoSans = Noto_Sans({ subsets: ["latin"], weight: ["300", "400", "500", "600", "700"] })
+const _notoSans = Noto_Sans({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+});
+const _inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+});
 
 export const metadata: Metadata = {
   title: "FlexLiving - Find Your Perfect Stay",
-  description: "Discover amazing properties in the heart of London with FlexLiving",
+  description:
+    "Discover amazing properties in the heart of London with FlexLiving",
   generator: "v0.app",
   icons: {
     icon: [
@@ -39,19 +42,23 @@ export const metadata: Metadata = {
     ],
     apple: "/apple-icon.png",
   },
-}
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
     <html lang="en">
-      <body className={`font-sans antialiased ${_notoSans.className}`}>
+      <body
+        className={`font-sans antialiased ${_notoSans.className} ${_inter.className}`}
+      >
+        <NextTopLoader />
+        <Toaster richColors position="top-right" />
         <QueryProvider>{children}</QueryProvider>
         <Analytics />
       </body>
     </html>
-  )
+  );
 }

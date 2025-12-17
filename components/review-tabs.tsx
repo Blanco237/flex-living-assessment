@@ -1,65 +1,78 @@
-"use client"
+"use client";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import type { Review } from "@/types"
-import type { ReviewStatus } from "@/actions/review-approvals"
-import { ReviewCard } from "./review-card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { Review } from "@/types";
+import { ReviewCard } from "./review-card";
+import { useMemo } from "react";
+import { groupBy } from "@/lib/utils";
+import type { ReviewStatus } from "@/actions/review-approvals";
 
 interface ReviewTabsProps {
-  reviews: Review[]
-  reviewStatuses: Map<string, ReviewStatus>
-  onApprove: (reviewId: string) => void
-  onReject: (reviewId: string) => void
+  reviews: Review[];
+  reviewStatuses: Map<number | string, ReviewStatus>;
 }
 
-export function ReviewTabs({ reviews, reviewStatuses, onApprove, onReject }: ReviewTabsProps) {
-  const approvedReviews = reviews.filter((r) => reviewStatuses.get(r.id) === "approved")
-  const rejectedReviews = reviews.filter((r) => reviewStatuses.get(r.id) === "rejected")
-  const pendingReviews = reviews.filter((r) => reviewStatuses.get(r.id) === "pending")
+export function ReviewTabs({ reviews, reviewStatuses }: ReviewTabsProps) {
+  const groupedReviews = useMemo(() => {
+    return groupBy(reviews, (review) => {
+      return reviewStatuses.get(String(review.id)) ?? ("pending" as ReviewStatus);
+    });
+  }, [reviews, reviewStatuses]);
+
+
+  const approved = groupedReviews?.approved ?? [];
+  const pending = groupedReviews?.pending ?? [];
+  const rejected = groupedReviews?.rejected ?? [];
 
   return (
     <Tabs defaultValue="pending" className="w-full">
       <TabsList className="grid w-full grid-cols-3">
-        <TabsTrigger value="pending">Pending ({pendingReviews.length})</TabsTrigger>
-        <TabsTrigger value="approved">Approved ({approvedReviews.length})</TabsTrigger>
-        <TabsTrigger value="rejected">Rejected ({rejectedReviews.length})</TabsTrigger>
+        <TabsTrigger value="pending">Pending ({pending.length})</TabsTrigger>
+        <TabsTrigger value="approved">Approved ({approved.length})</TabsTrigger>
+        <TabsTrigger value="rejected">Rejected ({rejected.length})</TabsTrigger>
       </TabsList>
 
-      <TabsContent value="pending" className="space-y-4 mt-6">
-        {pendingReviews.length === 0 ? (
-          <p className="text-center text-muted-foreground py-8">No pending reviews</p>
+      <TabsContent value="pending" className="space-y-4 mt-6 ">
+        {pending.length === 0 ? (
+          <p className="text-center text-muted-foreground py-8">
+            No pending reviews
+          </p>
         ) : (
-          <div className="grid gap-4">
-            {pendingReviews.map((review) => (
-              <ReviewCard key={review.id} review={review} status="pending" onApprove={onApprove} onReject={onReject} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {pending.map((review) => (
+              <ReviewCard key={review.id} review={review} status="pending" />
             ))}
           </div>
         )}
       </TabsContent>
 
       <TabsContent value="approved" className="space-y-4 mt-6">
-        {approvedReviews.length === 0 ? (
-          <p className="text-center text-muted-foreground py-8">No approved reviews</p>
+        {approved.length === 0 ? (
+          <p className="text-center text-muted-foreground py-8">
+            No approved reviews
+          </p>
         ) : (
-          <div className="grid gap-4">
-            {approvedReviews.map((review) => (
-              <ReviewCard key={review.id} review={review} status="approved" onApprove={onApprove} onReject={onReject} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {approved.map((review) => (
+              <ReviewCard key={review.id} review={review} status="approved" />
             ))}
           </div>
         )}
       </TabsContent>
 
       <TabsContent value="rejected" className="space-y-4 mt-6">
-        {rejectedReviews.length === 0 ? (
-          <p className="text-center text-muted-foreground py-8">No rejected reviews</p>
+        {rejected.length === 0 ? (
+          <p className="text-center text-muted-foreground py-8">
+            No rejected reviews
+          </p>
         ) : (
-          <div className="grid gap-4">
-            {rejectedReviews.map((review) => (
-              <ReviewCard key={review.id} review={review} status="rejected" onApprove={onApprove} onReject={onReject} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {rejected.map((review) => (
+              <ReviewCard key={review.id} review={review} status="rejected" />
             ))}
           </div>
         )}
       </TabsContent>
     </Tabs>
-  )
+  );
 }
