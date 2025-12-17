@@ -10,7 +10,6 @@ import NextTopLoader from "nextjs-toploader";
 import { Inter, Noto_Sans } from "next/font/google";
 import { Toaster } from "sonner";
 
-// Initialize fonts
 const _notoSans = Noto_Sans({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
@@ -24,23 +23,18 @@ export const metadata: Metadata = {
   title: "FlexLiving - Find Your Perfect Stay",
   description:
     "Discover amazing properties in the heart of London with FlexLiving",
-  generator: "v0.app",
   icons: {
     icon: [
       {
-        url: "/icon-light-32x32.png",
+        url: "/flexliving.webp",
         media: "(prefers-color-scheme: light)",
       },
       {
-        url: "/icon-dark-32x32.png",
+        url: "/flexliving.webp",
         media: "(prefers-color-scheme: dark)",
       },
-      {
-        url: "/icon.svg",
-        type: "image/svg+xml",
-      },
     ],
-    apple: "/apple-icon.png",
+    apple: "/flexliving.webp",
   },
 };
 

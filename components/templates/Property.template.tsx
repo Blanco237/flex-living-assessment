@@ -30,6 +30,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { useParams } from "next/navigation";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 export default function PropertyDetailTemplate() {
   const { id } = useParams();
@@ -43,6 +44,8 @@ export default function PropertyDetailTemplate() {
   );
 
   const { data: approvedReviews } = useQuery(usePropertyReviews(propertyId));
+
+  usePageTitle(property?.name)
 
   if (propertyLoading) {
     return (
