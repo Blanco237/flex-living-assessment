@@ -4,9 +4,17 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { Property } from "@/types";
-import { ChevronLeft, ChevronRight, Star } from "lucide-react";
+import { Star } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "nextjs-toploader/app";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+  CarouselDots,
+} from "@/components/ui/carousel";
 
 interface PublicPropertyCardProps {
   property: Property;
@@ -17,81 +25,59 @@ export function PublicPropertyCard({ property }: PublicPropertyCardProps) {
   const images =
     property.listingImages?.map((img) => img.url).filter(Boolean) ||
     ["/modern-city-apartment.png"];
-  const [currentImage, setCurrentImage] = useState(0);
 
   const amenities =
     property.listingAmenities?.slice(0, 3).map((a) => a.amenityName) || [];
 
   const hasMultipleImages = images.length > 1;
 
-  const goToPrev = (event: React.MouseEvent) => {
-    event.stopPropagation();
-    setCurrentImage((prev) => (prev - 1 + images.length) % images.length);
-  };
-
-  const goToNext = (event: React.MouseEvent) => {
-    event.stopPropagation();
-    setCurrentImage((prev) => (prev + 1) % images.length);
-  };
-
-
   return (
     <Card
-      className="overflow-hidden transition-all cursor-pointer border-none py-0 shadow-none hover:shadow-lg hover:-translate-y-1 bg-transparent"
+      className="overflow-hidden transition-all cursor-pointer border-none py-0 shadow-none hover:shadow-lg hover:-translate-y-1 bg-transparent group"
       onClick={() => router.push(`/properties/${property.id}`)}
     >
-      <div className="relative h-[320px] w-full overflow-hidden rounded-3xl group">
-        <Image
-          src={images[currentImage] || "/placeholder.svg"}
-          alt={property.name}
-          fill
-          className="object-cover"
-        />
+      <div className="relative h-[320px] w-full overflow-hidden rounded-3xl" onClick={(e) => e.stopPropagation()}>
+        <Carousel className="w-full h-full">
+          <CarouselContent className="h-full ml-0">
+            {images.map((image, index) => (
+              <CarouselItem key={index} className="pl-0 h-full relative">
+                 <div className="relative w-full h-full">
+                  <Image
+                    src={image}
+                    alt={`${property.name} - Image ${index + 1}`}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
 
-        <div className="absolute top-4 left-4">
-          <Badge className="bg-[#cc1f1f] font-body hover:bg-red-700 text-white border-0 rounded-full py-1 px-3">
-            All listings
-          </Badge>
-        </div>
-
-        {property.averageReviewRating > 0 && (
-          <div className="absolute top-4 right-4">
-            <Badge className="bg-slate-700 hover:bg-slate-800 text-white border-0 rounded-full px-4 py-1 flex items-center gap-1">
-              {property.averageReviewRating.toFixed(2)}
-              <Star className="h-3 w-3 fill-white" />
+          <div className="absolute top-4 left-4 z-10">
+            <Badge className="bg-[#cc1f1f] font-body hover:bg-red-700 text-white border-0 rounded-full py-1 px-3">
+              All listings
             </Badge>
           </div>
-        )}
 
-        {hasMultipleImages && (
-          <>
-            <button
-              type="button"
-              onClick={goToPrev}
-              className="cursor-pointer absolute left-3 top-1/2 -translate-y-1/2 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-slate-800 shadow-sm hover:bg-white opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              onClick={goToNext}
-              className="cursor-pointer absolute right-3 top-1/2 -translate-y-1/2 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-slate-800 shadow-sm hover:bg-white opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </button>
-          </>
-        )}
+          {property.averageReviewRating > 0 && (
+            <div className="absolute top-4 right-4 z-10">
+              <Badge className="bg-slate-700 hover:bg-slate-800 text-white border-0 rounded-full px-4 py-1 flex items-center gap-1">
+                {property.averageReviewRating.toFixed(2)}
+                <Star className="h-3 w-3 fill-white" />
+              </Badge>
+            </div>
+          )}
 
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-          {images.map((_, i) => (
-            <div
-              key={i}
-              className={`h-1.5 w-1.5 rounded-full transition-colors ${
-                i === currentImage ? "bg-white" : "bg-white/50"
-              }`}
-            />
-          ))}
-        </div>
+          {hasMultipleImages && (
+            <>
+              <CarouselPrevious className="left-3 bg-white/90 hover:bg-white text-slate-800 border-none opacity-0 disabled:opacity-0 group-hover:opacity-100 group-hover:disabled:opacity-50 transition-opacity duration-200" />
+              <CarouselNext className="right-3 bg-white/90 hover:bg-white text-slate-800 border-none opacity-0 disabled:opacity-0 group-hover:opacity-100 group-hover:disabled:opacity-50 transition-opacity duration-200" />
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <CarouselDots />
+              </div>
+            </>
+          )}
+        </Carousel>
       </div>
 
       <div className="p-5 space-y-3">
