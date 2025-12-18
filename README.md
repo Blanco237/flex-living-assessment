@@ -1,30 +1,42 @@
-# Manager dashboard UI
+# Flex Living Assessment
 
-*Automatically synced with your [v0.app](https://v0.app) deployments*
+This is a Next.js project designed for the Flex Living Assessment. It integrates with various external services including Supabase, Hostaway, Mockaroo, and Google Places.
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/blanco237s-projects/v0-manager-dashboard-ui)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.app-black?style=for-the-badge)](https://v0.app/chat/df2uJEpHlqH)
+## Getting Started
 
-## Overview
+To get started with the project, follow these steps:
 
-This repository will stay in sync with your deployed chats on [v0.app](https://v0.app).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.app](https://v0.app).
+1.  **Clone the repository:**
 
-## Deployment
+    ```bash
+    git clone <repository-url>
+    cd flex-living-assessment
+    ```
 
-Your project is live at:
+2.  **Install dependencies:**
 
-**[https://vercel.com/blanco237s-projects/v0-manager-dashboard-ui](https://vercel.com/blanco237s-projects/v0-manager-dashboard-ui)**
+    ```bash
+    npm install
+    ```
 
-## Build your app
+3.  **Set up environment variables:**
+    Create a `.env` file in the root directory and add the following variables:
 
-Continue building your app on:
+    | Variable                | Description                             |
+    | :---------------------- | :-------------------------------------- |
+    | `HOSTAWAY_ACCOUNT_ID`   | Your Hostaway Account ID                |
+    | `HOSTAWAY_API_KEY`      | Your Hostaway API Key                   |
+    | `ACCESS_SECRET`         | Secret key for verifying manager access |
+    | `SUPABASE_URL`          | Your Supabase project URL               |
+    | `SUPABASE_ANON_KEY`     | Your Supabase anonymous key             |
+    | `MOCKAROO_ENDPOINT`     | Endpoint for Mockaroo API               |
+    | `MOCKAROO_KEY`          | API Key for Mockaroo                    |
+    | `GOOGLE_PLACES_API_KEY` | API Key for Google Places               |
 
-**[https://v0.app/chat/df2uJEpHlqH](https://v0.app/chat/df2uJEpHlqH)**
+4.  **Run the development server:**
 
-## How It Works
+    ```bash
+    npm run dev
+    ```
 
-1. Create and modify your project using [v0.app](https://v0.app)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+    Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
